@@ -1,4 +1,4 @@
-package com.example.state_event_playground.ui.theme
+package com.example.state_event_playground.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
