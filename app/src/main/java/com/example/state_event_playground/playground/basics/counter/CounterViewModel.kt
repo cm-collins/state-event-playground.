@@ -1,6 +1,7 @@
 package com.example.state_event_playground.playground.basics.counter
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -8,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 
 /**
@@ -62,11 +64,14 @@ class CounterViewModel: ViewModel() {
         // Example: show a message at a milestone (one-time effect)
         val c = _state.value.count
         if (c == 10) {
-            // tryEmit is non-suspending; good for simple UI effects.
-            // If you need guaranteed delivery, emit from a coroutine.
-            _effects.tryEmit(CounterEffect.ShowMessage("Reached 10 🎉"))
+            // Using emit inside viewModelScope to guarantee delivery even if UI is busy
+            viewModelScope.launch {
+                _effects.emit(CounterEffect.ShowMessage("Reached 10 🎉"))
+            }
+
+
+            }
         }
-    }
 
     private fun decrement() {
         _state.update { current ->
@@ -77,9 +82,8 @@ class CounterViewModel: ViewModel() {
 
     private fun reset() {
         _state.update { it.copy(count = 0) }
-        _effects.tryEmit(CounterEffect.ShowMessage("Reset to 0"))
+        viewModelScope.launch {
+            _effects.emit(CounterEffect.ShowMessage("Reset to 0"))
+        }
     }
-
-
-
 }
